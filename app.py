@@ -35,8 +35,8 @@ def process_file(file):
     # Process the data according to requirements
 
     # 0. Remove rows where at least one field is empty
-    df = df.dropna(how='any')
-    
+    df = df.dropna(how="any")
+
     # 1. Remove redundant apostrophes from Document Number
     df["Document Number"] = df["Document Number"].str.replace("'", "")
 
@@ -60,8 +60,13 @@ def process_file(file):
 
     df["Document Date"] = df["Document Date"].apply(format_date)
 
-    # 4. Format Document Balance to have 2 decimal places
-    df["Document Balance"] = df["Document Balance"].apply(lambda x: f"{float(x):.2f}")
+    # 4. Format Document Balance to have 2 decimal places and make negative if Transaction Type is CRD
+    df["Document Balance"] = df.apply(
+        lambda row: f"-{float(row['Document Balance']):.2f}"
+        if row["Transaction Type"] == "CRD"
+        else f"{float(row['Document Balance']):.2f}",
+        axis=1,
+    )
 
     # 5. Reorder columns and drop Due Date
     result_df = df[
